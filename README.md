@@ -1,2 +1,2 @@
-# photography
+# Photography
 Sana Emiolechi - Photography
