@@ -1,3 +1,7 @@
+# Custom
+assets/
+.DS_Store
+
 # Logs
 logs
 *.log
