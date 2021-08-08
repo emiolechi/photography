@@ -15,21 +15,21 @@ For now you need to clone this repo, including my images. I'll change this some 
 
 ## Install Locally
 Clone repo and run.
-'''
+```
 yarn install
-'''
+```
 or
-'''
+```
 npm install
-'''
+```
 
 ## Generate the static website
-Images inside the assets folder are scanned and hashed. If not already existing thumbnails and full size images for the web are generated. If an image is located in a subfolder the subfolder name is used as tag to filter the images within the application.
+Images inside the assets folder are scanned and hashed. If not already existing thumbnails and full size images for the web are generated. If an image is located in a subfolder the subfolder name is used as tag to filter the images within the application. This applies also for multiple nested folders.
 
 Within your repo directory.
-'''
+```
 node generate.js
-'''
+```
 
 
 ## License
