@@ -359,12 +359,13 @@
             let index = 0
             let galleryScrollPos = 0
             const junkSize = 10
+            const loadThreshold = 50
             let junkElems = []
-            let triggered = false
             const imageComplete = () => {
                 if (--loading <= 0) junkComplete()
             }
             const junkComplete = () => {
+                console.log("junk Complete")
                 loaderContainer.remove()
                 junkElems.forEach(imgElem => {
                     galleryContainer.append(imgElem)
@@ -377,18 +378,15 @@
                 })
                 junkElems = []
                 loading = 0
-                if (triggered) {
-                    triggered = false
-                    loadNextJunk()
-                } else if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight) {
+                if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight - loadThreshold) {
                     loadNextJunk()
                 }
             }
             const loadNextJunk = () => {
                 if (loading) {
-                    triggered = true
                     return
                 }
+                console.log("loadNextJunk")
                 const limit = index+Math.min(list.length-index, junkSize)
                 if (index < limit) {
                     galleryContainer.append(loaderContainer)
@@ -424,7 +422,7 @@
             loadNextJunk()
             const onScroll = (ev) => {
                 console.log("onScroll", galleryContainer.scrollTop, galleryContainer.offsetHeight, galleryContainer.scrollHeight)
-                if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight - 50) {
+                if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight - loadThreshold) {
                     loadNextJunk()
                 }
                 galleryScrollPos = galleryContainer.scrollTop
