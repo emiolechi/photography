@@ -423,19 +423,20 @@
             }
             loadNextJunk()
             const onScroll = (ev) => {
-                if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight) {
+                console.log("onScroll", galleryContainer.scrollTop, galleryContainer.offsetHeight, galleryContainer.scrollHeight)
+                if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight - 50) {
                     loadNextJunk()
                 }
                 galleryScrollPos = galleryContainer.scrollTop
             }
             galleryContainer.attach = () => {
                 if (galleryScrollPos) galleryContainer.scrollTop = galleryScrollPos
-                galleryContainer.addEventListener("scroll", onScroll)
                 galleryContainer.addEventListener("touchmove", onScroll)
+                galleryContainer.addEventListener("scroll", onScroll)
             }
             galleryContainer.detach = () => {
-                galleryContainer.removeEventListener("scroll", onScroll)
                 galleryContainer.removeEventListener("touchmove", onScroll)
+                galleryContainer.removeEventListener("scroll", onScroll)
             }
             galleryContainer.destroy = () => {
                 Array.from(galleryContainer.children).forEach(child => child.destroy())
