@@ -279,7 +279,7 @@
                 currentState.tags = []
                 currentState.list = [...data.list]
             }
-            currentState.list = currentState.list.sort((a,b)=>{return a.name > b.name})
+            currentState.list = currentState.list.sort((a,b)=>{return a.name < b.name ? -1 : 1;})
             currentState.filters = Array.from(new Set(currentState.list.map(image => image.tags).flat().sort()))
             invalidate(GALLERY)
             invalidate(FILTER)
