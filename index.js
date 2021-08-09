@@ -431,9 +431,11 @@
             galleryContainer.attach = () => {
                 if (galleryScrollPos) galleryContainer.scrollTop = galleryScrollPos
                 galleryContainer.addEventListener("scroll", onScroll)
+                galleryContainer.addEventListener("touchmove", onScroll)
             }
             galleryContainer.detach = () => {
                 galleryContainer.removeEventListener("scroll", onScroll)
+                galleryContainer.removeEventListener("touchmove", onScroll)
             }
             galleryContainer.destroy = () => {
                 Array.from(galleryContainer.children).forEach(child => child.destroy())
