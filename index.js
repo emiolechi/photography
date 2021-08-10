@@ -368,7 +368,6 @@
                 if (--loading <= 0) junkComplete()
             }
             const junkComplete = () => {
-                console.log("junk Complete")
                 loaderContainer.remove()
                 junkElems.forEach(imgElem => {
                     galleryContainer.append(imgElem)
@@ -389,7 +388,6 @@
                 if (loading) {
                     return
                 }
-                console.log("loadNextJunk")
                 const limit = index+Math.min(list.length-index, junkSize)
                 if (index < limit) {
                     galleryContainer.append(loaderContainer)
@@ -424,7 +422,6 @@
             }
             loadNextJunk()
             const onScroll = (ev) => {
-                console.log("onScroll", galleryContainer.scrollTop, galleryContainer.offsetHeight, galleryContainer.scrollHeight)
                 if (galleryContainer.scrollTop + galleryContainer.offsetHeight >= galleryContainer.scrollHeight - loadThreshold) {
                     loadNextJunk()
                 }
