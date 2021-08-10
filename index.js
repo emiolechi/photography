@@ -206,8 +206,11 @@
             })
             Array.from(document.querySelectorAll(".colorize.active")).forEach(elem => {
                 elem.style.backgroundColor = `rgba(${ref.r},${ref.g},${ref.b},0.9)`
-                elem.style.color = isBright(ref)?'black':'white'
+                if(elem.classList.contains('complementary-text')) {
+                    elem.style.color = isBright(ref)?'black':'white'
+                }
             })
+
         }
 
 
