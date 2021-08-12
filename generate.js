@@ -4,11 +4,12 @@ import * as path from 'path'
 import fs from 'fs-extra'
 import imghash, { hash } from 'imghash';
 import ColorThief from 'colorthief'
-import quantize from 'quantize';
+import quantize from 'quantize'
+import exifr from 'exifr'
 
 
 (async () => {
-    let data = {list: [], tags: {}, names: []}
+    let data = {list: [], tags: {}, paths: {}, names: []}
     try {
         // await fs.emptyDir('generated')
 
@@ -19,7 +20,6 @@ import quantize from 'quantize';
 
         const paths = await globby('assets', {
             expandDirectories: {
-                files: ['*.*'],
                 extensions: ['jpg', 'png']
             }
         });
@@ -30,14 +30,30 @@ import quantize from 'quantize';
                 console.log(`Processing Image ${i+1}/${paths.length} ${p}.`)
                 const filename = path.basename(p)
                 const imageHash = await imghash.hash(p,12)
+                const imageMeta = await exifr.parse(p, {
+                    tiff: true,
+                    xmp: true,
+                    icc: true,
+                    iptc: true,
+                    jfif: true,
+                    ihdr: true,
+                    interop: true,
+                    makerNote: true,
+                    userComment: true
+                })
+                const dominantColor = await ColorThief.getColor(p)
 
                 const name = filename.replace('_',' ').replace(/\.[^\.]*$/gi, '')
-                const directories = path.dirname(p).split(path.sep)
-                const dominantColor = await ColorThief.getColor(p)
-                directories.shift() // remove root dir
-                directories.forEach((dir)=>{
-                    if(!data.tags.hasOwnProperty(dir)) data.tags[dir] = {colors:[]}
-                    data.tags[dir].colors.push(dominantColor)
+                const pathArray = path.dirname(p).split(path.sep)
+                pathArray.shift() // remove root dir
+                const pathString = pathArray.join("/")
+                if(!data.paths.hasOwnProperty(pathString)) data.paths[pathString] = {colors:[]}
+                data.paths[pathString].colors.push(dominantColor)
+
+                const tags = imageMeta.subject || []
+                tags.forEach((tag)=>{
+                    if(!data.tags.hasOwnProperty(tag)) data.tags[tag] = {colors:[]}
+                    data.tags[tag].colors.push(dominantColor)
                 })
 
                 const meta = {
@@ -51,8 +67,12 @@ import quantize from 'quantize';
                         g: dominantColor[1],
                         b: dominantColor[2],
                     },
-                    tags: Array.from(new Set(directories))
+                    path: pathString,
+                    date: imageMeta.DateTimeOriginal || imageMeta.CreateDate,
+                    rating: (imageMeta.rating * 20) || imageMeta.RatingPercent || 0,
+                    tags: Array.from(new Set(tags))
                 }
+                console.log(meta)
                 const thumbExists = await fs.pathExists(meta.thumbnail)
                 if(!thumbExists) {
                     await resize({
@@ -77,7 +97,6 @@ import quantize from 'quantize';
                     console.log("Image exists, skipping.")
                 }
 
-                console.log(meta)
                 data.list.push(meta)
                 console.log("Done.")
 
@@ -85,12 +104,21 @@ import quantize from 'quantize';
                 console.error("Error processing image.", e)
             }
         }
+        console.log("Average tag colors")
         Object.keys(data.tags).forEach((tag) => {
             const col = quantize(data.tags[tag].colors, 5).palette()[0]
-            console.log(col)
+            console.log(tag, col)
             data.tags[tag].dominantColor = {r: col[0], g: col[1], b: col[2]}
             data.tags[tag].count = data.tags[tag].colors.length
             delete data.tags[tag].colors
+        })
+        console.log("Average path colors")
+        Object.keys(data.paths).forEach((pathString) => {
+            const col = quantize(data.paths[pathString].colors, 5).palette()[0]
+            console.log(pathString, col)
+            data.paths[pathString].dominantColor = {r: col[0], g: col[1], b: col[2]}
+            data.paths[pathString].count = data.paths[pathString].colors.length
+            delete data.paths[pathString].colors
         })
         await fs.writeFile(
             path.join('generated', 'data.json'), 
