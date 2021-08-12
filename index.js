@@ -53,7 +53,6 @@
         const contentContainer = document.querySelector(".content")
         const filterButton = document.querySelector('.filter-button')
         const galleryButton = document.querySelector('.gallery-button')
-        const aboutButton = document.querySelector('.about-button')
         const backButton = document.querySelector('.back')
         const logoEl = document.querySelector('.logo')
 
@@ -207,7 +206,7 @@
             Array.from(document.querySelectorAll(".colorize.active")).forEach(elem => {
                 elem.style.backgroundColor = `rgba(${ref.r},${ref.g},${ref.b},0.9)`
                 if(elem.classList.contains('complementary-text')) {
-                    elem.style.color = isBright(ref)?'black':'white'
+                    elem.style.color = isBright(ref)?'#121009':'#FCFAF9'
                 }
             })
 
@@ -215,10 +214,9 @@
 
 
         function makeNavigation() {
-            attachButtonLogic(logoEl, () => {randomizeName()})
+            attachButtonLogic(logoEl, () => {randomizeName();navigate(ABOUT)})
             attachButtonLogic(galleryButton, () => {navigate(GALLERY)})
             attachButtonLogic(filterButton, () => {navigate(FILTER)})
-            attachButtonLogic(aboutButton, () => {navigate(ABOUT)})
             attachButtonLogic(galleryButton, () => {navigate(GALLERY)})
             attachButtonLogic(backButton, () => {navigate(GALLERY)})
         }
@@ -227,7 +225,6 @@
             backButton.classList.add("hidden")
             infoElem.classList.add("hidden")
             galleryButton.classList.remove("hidden")
-            aboutButton.classList.remove("hidden")
             filterButton.classList.remove("hidden")
         }
 
@@ -235,7 +232,6 @@
             backButton.classList.remove("hidden")
             infoElem.classList.remove("hidden")
             galleryButton.classList.add("hidden")
-            aboutButton.classList.add("hidden")
             filterButton.classList.add("hidden")
         }
 
@@ -243,7 +239,6 @@
             backButton.classList.remove("active")
             infoElem.classList.remove("active")
             galleryButton.classList.remove("active")
-            aboutButton.classList.remove("active")
             filterButton.classList.remove("active")
         }
 
@@ -263,7 +258,6 @@
                     break
                 case ABOUT:
                     useDefaultNavigation()
-                    aboutButton.classList.add("active")
                     break
             }
             updateColors()
