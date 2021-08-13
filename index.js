@@ -537,7 +537,6 @@
                     imgElem.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotate(${transform.rotation}deg)`
                 }
                 container.destroy = () => {
-                    console.log("destroy image")
                     imgElem.removeEventListener("load", onLoad)
                     imgElem.src = ''
                     imgElem.onload = null
