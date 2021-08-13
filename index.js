@@ -1,6 +1,6 @@
 (function(){
 
-    console.log("Welcome to my hopefully well behaving Image Gallery")
+    console.log("%cThe hopefully well behaving image gallery.",'font-weight: bold;')
 
     // GENERIC
 
@@ -76,7 +76,8 @@
         let currentState = clone(defaultState)
 
         function initialize() {
-            console.log(`My name is ${currentState.name} and I am happy to welcome you within the internals.`)
+            console.log(`My name is ${currentState.name} and I am happy to show you the internals.`)
+            console.log('https://github.com/emiolechi/photography')
             readState()
             makeNavigation()
             applyState()
