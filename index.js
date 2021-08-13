@@ -370,7 +370,7 @@
                             imgElem.style.transition = "opacity ease-in 0.5s";
                             imgElem.style.opacity = 1.0
                         }
-                    },100)
+                    }, 10)
                 })
                 junkElems = []
                 loading = 0
@@ -457,10 +457,32 @@
 
             detailContainer.append(imgContainer)
 
-            const makeImage = (list, index) => {
+            const animateThreshold = .001
+            const animateFactor = .167
+            const gcThreshold = 15
+            const gcLimit = 10
+            const swipeThreshold = .167
+            const imagePreloadCycles = 2 // images per side (left & right)
+            let offset = -imagePreloadCycles
+            let panTarget = offset
+            let panOffset = 0
+            infoElem.innerText = `${list[index].name}`
+
+            const mc = new Hammer.Manager(detailContainer, {})
+           
+
+            const makeImage = (list, index, initPosition) => {
+                initPosition = initPosition || 0
                 const image = list[index]
                 const container = document.createElement("div")
                 container.classList.add("image-group")
+                container.position = -1
+                container.updatePosition = () => {
+                    container.style.left = `${container.position*100}%`
+                    container.style.top = `${0}%`
+                    if (container.position == -1 || container.position == 1) container.resetTransform()
+                }
+
                 const imgElem = document.createElement("img")
                 imgElem.style.opacity = 0
                 imgElem.setAttribute('loading', 'eager')
@@ -473,113 +495,207 @@
                     container.append(imgElem)
                     setTimeout(()=>{
                         if (imgElem) {
-
                             imgElem.style.transition = "opacity ease-in 0.5s";
                             imgElem.style.opacity = 1.0
                         }
-                    }, 100)
+                    }, 10)
                 }
                 imgElem.addEventListener("load", onLoad)
                 imgElem.src = image.src
                 container.index = index
+
+                //let scale = 1
+                //let rotation = 0
+                let origin = {x:0, y:0}
+                //let translate = {x:0, y:0}
+                const defaultTransform = {
+                    isDefault: true,
+                    x: 0,
+                    y: 0,
+                    scale: 1,
+                    rotation: 0
+                }
+                let transform = {...defaultTransform}
+                container.setOrigin = (x, y) => {
+                    origin.x = x
+                    origin.y = y
+                    imgElem.style.transformOrigin = `${origin.x}px ${origin.y}px`
+                }
+                container.getOrigin = () => {
+                    return {x:origin.x, y:origin.y}
+                }
+                container.setTransform = (value) => {
+                    transform = {...transform, ...value, ...{isDefault: false}}
+                    imgElem.style.transition = "unset"
+                    imgElem.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotate(${transform.rotation}deg)`
+                }
+                container.getTransform = () => {
+                    return {...transform}
+                }
+                container.resetTransform = (animated) => {
+                    if (transform.isDefault) return
+                    transform = {...defaultTransform}
+                    if (animated) imgElem.style.transition = "transform ease-in-out 0.5s"
+                    else imgElem.style.transition = "unset"
+                    imgElem.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotate(${transform.rotation}deg)`
+                }
                 container.destroy = () => {
+                    console.log("destroy image")
                     imgElem.removeEventListener("load", onLoad)
                     imgElem.src = ''
                     imgElem.onload = null
                     imgElem.onerror = null
                     imgElem.remove()
                 }
+
+                container.updatePosition()
                 return container
             }
 
             const preload = () => {
-                // optimized load order
-                let order = []
-                order[2] = makeImage(list, index)
-                order[3] = makeImage(list, wrap(list,index+1))
-                order[1] = makeImage(list, wrap(list,index-1))
-                order[4] = makeImage(list, wrap(list,index+2))
-                order[0] = makeImage(list, wrap(list,index-2))
+                // optimized ping pong load order
+                let order = [makeImage(list, wrap(list, index), calcImagePosition(index))]
+                for (let i = 1; i<=imagePreloadCycles; i++) {
+                    order.push(makeImage(list, wrap(list, index+i)))
+                    order.unshift(makeImage(list, wrap(list, index-i)))
+                }
                 imgContainer.append(...order)
+                updatePosition()
             }
-            preload()
 
+            const calcImagePosition = (index) => {
+                return Math.min(1, Math.max(-1, index + offset + panOffset))
+            }
 
-            infoElem.innerText = `${list[index].name}`
+            const updatePosition = () => {
+                Array.from(imgContainer.children).forEach((child, index) => {
+                    let newPos = calcImagePosition(index)
+                    if (child.position != newPos) {
+                        child.position = newPos
+                        child.updatePosition()
+                    }
+                })
+            }
+            mc.add([
+                new Hammer.Tap,
+                new Hammer.Pinch(), 
+                new Hammer.Pan({direction: Hammer.DIRECTION_HORIZONTAL, threshold: 15})
+            ])
+            let relCenter = {x:0, y:0}
+            let relRotation = 0
+            let imgTransform
+            mc.on("pinchstart", (ev)=>{
+                relCenter = ev.center
+                relRotation = ev.rotation
+                let currentImg = imgContainer.children[Math.round(-offset)]
+                if(currentImg) { 
+                    imgTransform = currentImg.getTransform()
+                }
+            })
+            mc.on("pinchmove", (ev)=>{
+                let currentImg = imgContainer.children[Math.round(-offset)]
+                if(currentImg) { 
+                    currentImg.setTransform({
+                        scale: Math.max(.5, Math.min(5, imgTransform.scale * ev.scale)),
+                        x: imgTransform.x + (ev.center.x-relCenter.x ),
+                        y: imgTransform.y + (ev.center.y- relCenter.y ),
+                        rotation:  imgTransform.rotation + (ev.rotation - relRotation),
+                    })
+                }
+            })
+            mc.on("pinchend", (ev)=>{
 
-            const mc = new Hammer.Manager(detailContainer, {})
-            mc.add(new Hammer.Pan({direction: Hammer.DIRECTION_HORIZONTAL}))
-          
-            let offset = -2
-            imgContainer.style.marginLeft = `${(offset)*100}%`
-            let panOffset = 0
-            let transition = 0
+            })
+
+            mc.on("tap", (ev)=>{
+                let currentImg = imgContainer.children[Math.round(-offset)]
+                if(currentImg) { 
+                    currentImg.resetTransform(true)
+                }
+            })
+
             mc.on("panstart", (ev)=>{
-                if (!transition) {
-                    panOffset = 0
-                    imgContainer.style.transition = `unset`
-                }
+                panOffset = 0
+                updatePosition()
             })
+
             mc.on("panmove", (ev)=>{
-                if (!transition) {
-                    const w = imgContainer.getBoundingClientRect().width
-                    panOffset = ev.deltaX/w
-                    imgContainer.style.marginLeft = `${(offset + panOffset)*100}%`
-                }
+                const w = imgContainer.getBoundingClientRect().width
+                panOffset = ev.deltaX/w
+                updatePosition()
             })
-            
-            let panTarget = 0
+
             mc.on("panend", (ev)=>{
-                if (!transition) {
-                    if (panOffset >= .10) {
-                        offset++
-                        index = wrap(list, --index)
-                    } else if (panOffset <= -.10) {
-                        offset--
-                        index = wrap(list, ++index)
-                    }
-                    infoElem.innerText = `${list[index].name}`
-                    currentState.hash = list[index].hash
-                    currentState.color = list[index].dominantColor
-                    updateColors()
-                    saveState()
-                    imgContainer.style.transitionDuration = `${Math.abs((1-panOffset)*.5)}s`
-                    imgContainer.style.transitionTimingFunction = 'ease-out'
-                    imgContainer.style.marginLeft = `${offset*100}%`
-                    transition++
+                if (panOffset < -swipeThreshold) {
+                    panTarget = Math.round(offset - 1)
+                    index = wrap(list, index + 1)
+                    loadRight()
+                } else if (panOffset > swipeThreshold) {
+                    panTarget = Math.round(offset + 1)
+                    index = wrap(list, index - 1)
+                    loadLeft()
+                } else {
+                    panTarget = Math.round(offset)
                 }
+                offset += panOffset
+                panOffset = 0
+                infoElem.innerText = `${list[index].name}`
+                currentState.hash = list[index].hash
+                currentState.color = list[index].dominantColor
+                updateColors()  
+                saveState()
+                animate()
             })
-            const onTransitionEnd = (ev) => {
-                if(ev.target !== imgContainer) return
-                transition--
-                manage()
-            }
-            imgContainer.addEventListener('transitionend', onTransitionEnd)
-            const manage = () => {
-                let prepended = false
-                let appended = false
-                while (offset >= -1) {
-                    imgContainer.prepend(makeImage(list, wrap(list,imgContainer.children[0].index-1)))
-                    offset--
-                    prepended = true
-                }
-                if (!prepended) {
-                    while (offset <= -(imgContainer.children.length-2)) {
-                        imgContainer.append(
-                            makeImage(
-                                list, 
-                                wrap(list,imgContainer.children[imgContainer.children.length-1].index+1)
-                            )
-                        )
-                        appended = true
+
+            const animate = () => {
+                requestAnimationFrame(()=>{
+                    const delta = panTarget - offset
+                    if (delta > animateThreshold || delta < -animateThreshold){
+                        offset += delta * animateFactor
+                        updatePosition()
+                        animate()
+                    } else {
+                        offset = panTarget
+                        updatePosition()
+                        gc()
                     }
+                })
+            }
+
+            const loadLeft = () => {
+                while (offset >= -imagePreloadCycles) {
+                    imgContainer.prepend(
+                        makeImage(
+                            list, 
+                            wrap(list,imgContainer.children[0].index-1)
+                        )
+                    )
+                    offset--
+                    panTarget--
                 }
-                if (imgContainer.children.length >= 15) {
-                    while (imgContainer.children.length >= 10) {
+                updatePosition()
+            }
+            const loadRight = () => {
+                while (offset <= -(imgContainer.children.length-1-imagePreloadCycles)) {
+                    imgContainer.append(
+                        makeImage(
+                            list, 
+                            wrap(list,imgContainer.children[imgContainer.children.length-1].index+1)
+                        )
+                    )
+                }
+                updatePosition()
+            }
+
+            const gc = () => {
+                if (imgContainer.children.length >= gcThreshold) {
+                    const removeFromStart = offset <= gcLimit - gcThreshold
+                    while (imgContainer.children.length >= gcLimit) {
                         let child
-                        if (appended) {
+                        if (removeFromStart) {
                             child = imgContainer.children[0]
                             offset++
+                            panTarget++
                         } else {
                             child = imgContainer.children[imgContainer.children.length-1]
                         }
@@ -587,46 +703,35 @@
                         imgContainer.removeChild(child)
                     }
                 }
-                imgContainer.style.transition = 'unset'
-                imgContainer.style.marginLeft = `${offset*100}%`
+                updatePosition()
             }
             const onKeyDown = (event) => {
-                const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+                const key = event.key // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
                 switch (key) {
                     case "Left": // IE/Edge specific value
-                    case "ArrowLeft": 
-                        if (!transition) {
-                            offset++
-                            index = wrap(list, --index)
-                            infoElem.innerText = `${list[index].name}`
-                            currentState.hash = list[index].hash
-                            currentState.color = list[index].dominantColor
-                            updateColors()
-                            saveState()
-                            imgContainer.style.transitionDuration = `${.7}s`
-                            imgContainer.style.transitionTimingFunction = 'ease-in'
-                            imgContainer.style.marginLeft = `${offset*100}%`
-                            transition++
-                        } 
-                      
+                    case "ArrowLeft":
+                        panTarget = Math.round(offset + 1)
+                        index = wrap(list, index - 1)
+                        infoElem.innerText = `${list[index].name}`
+                        currentState.hash = list[index].hash
+                        currentState.color = list[index].dominantColor
+                        updateColors()
+                        saveState()
+                        loadLeft()
+                        animate()
                         break;
                     case "Right": // IE/Edge specific value
                     case "ArrowRight":
-                        if (!transition) {
-                            --offset
-                            index = wrap(list, ++index)
-                            infoElem.innerText = `${list[index].name}`
-                            currentState.hash = list[index].hash
-                            currentState.color = list[index].dominantColor
-                            updateColors()
-                            saveState()
-                            imgContainer.style.transitionDuration = `${.7}s`
-                            imgContainer.style.transitionTimingFunction = 'ease-in'
-                            imgContainer.style.marginLeft = `${offset*100}%`
-                            transition++
-                        }
-                     
-                      break;
+                        panTarget = Math.round(offset - 1)
+                        index = wrap(list, index + 1)
+                        infoElem.innerText = `${list[index].name}`
+                        currentState.hash = list[index].hash
+                        currentState.color = list[index].dominantColor
+                        updateColors()
+                        saveState()
+                        loadRight()
+                        animate()
+                        break;
                     case "Esc": // IE/Edge specific value
                     case "Escape":
                         navigate(GALLERY)
@@ -635,7 +740,6 @@
             }
             document.body.addEventListener('keydown', onKeyDown)
             detailContainer.destroy = () => {
-                imgContainer.removeEventListener('transitionend', onTransitionEnd)
                 document.body.removeEventListener('keydown', onKeyDown)
                 mc.destroy()
                 while (imgContainer.firstChild) {
@@ -644,6 +748,7 @@
                 }
             }
             detailContainer.noCache = true
+            preload()
             return detailContainer
         }
         viewGenerators.set(DETAIL, makeDetail)

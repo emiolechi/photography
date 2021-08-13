@@ -121,23 +121,29 @@ button:focus {
 
 @keyframes scale-portrait {
     0% {
-        transform: scale3d(0.0,0.0,0.0) perspective(30vw) rotateX(0deg) rotateY(0deg);
+        opacity: 0;
+        transform: scale3d(0.8,0.8,0.8) perspective(30vw) rotateX(0deg) rotateY(0deg);
     }
     50% {
+        opacity: .5;
         transform: scale3d(0.6,0.6,0.6) perspective(30vw) rotateX(-180.000deg) rotateY(0deg);
     }
     100% {
+        opacity: 1.0;
         transform: scale3d(.8,.8,.8) perspective(30vw) rotateX(-180deg) rotateY(-180.000deg);
     }
 }
 @keyframes scale-landscape {
     0% {
+        opacity: 0;
         transform: scale3d(0.0,0.0,0.0) perspective(30vh) rotateX(0deg) rotateY(0deg);
     }
     50% {
+        opacity: .5;
         transform: scale3d(0.6,0.6,0.6) perspective(30vh) rotateX(-180.000deg) rotateY(0deg);
     }
     100% {
+        opacity: 1.0;
         transform: scale3d(.8,.8,.8) perspective(30vh) rotateX(-180deg) rotateY(-180.000deg);
     }
 }
@@ -216,8 +222,9 @@ button:focus {
         margin-top: -5vw;
     }
     .spinner.delay-in {
+        opacity: 0;
         transform: scale3d(0,0,0);
-        animation: scale-portrait 2s ease-in, rotate-portrait 2s infinite ease-in-out 2s;
+        animation: scale-portrait 2s ease-in, rotate-portrait 2s infinite ease-in-out;
     }
     .spinner.delay-0 {
         transform: scale3d(.8,.8,.8);
@@ -247,6 +254,7 @@ button:focus {
         margin-top: -5vh;
     }
     .spinner.delay-in {
+        opacity: 0;
         transform: scale3d(0,0,0);
         animation: scale-landscape 2s ease-in, rotate-landscape 2s infinite ease-in-out 2s;
     }
@@ -811,22 +819,23 @@ button:focus {
 }
 
 .image-container {
-    display: flex;
+    position: relative;
     pointer-events: none;
     max-width: 100%;
     max-height: 100%;
     min-width: 100%;
     min-height: 100%;
-    flex-direction: row;
 }
 
 .image-group {
+    position: absolute;
+    display: flex;
     max-width: 100%;
     max-height: 100%;
     min-width: 100%;
     min-height: 100%;
     pointer-events: none;
-    position: relative;
+    overflow: hidden;
 }
 .image {
     object-fit: scale-down;
