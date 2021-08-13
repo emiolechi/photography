@@ -504,10 +504,7 @@
                 imgElem.src = image.src
                 container.index = index
 
-                //let scale = 1
-                //let rotation = 0
                 let origin = {x:0, y:0}
-                //let translate = {x:0, y:0}
                 const defaultTransform = {
                     isDefault: true,
                     x: 0,
