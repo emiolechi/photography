@@ -2,8 +2,8 @@
 html, body {
     background-color: #FCFAF9;
     color: #121009;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -20,16 +20,6 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
-}
-@media (orientation: portrait) {
-    body {
-        background-size: 10vw;
-    } 
-}
-@media (orientation: landscape) {
-    body {
-        background-size: 10vh;
-    }
 }
 
 button:focus {
@@ -60,17 +50,8 @@ button:focus {
         margin-bottom: 0;
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
-    .header {    
-        margin: 6px;
-        margin-bottom: 0;
-        gap: 6px;
-    }
-    .toolbar {
-        gap: 6px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .header {    
         margin: 6px;
         margin-bottom: 0;
@@ -99,16 +80,12 @@ button:focus {
         margin: 1vh;
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .content {
         margin: 6px;
     }
 }  
-@media (orientation: landscape) and (max-height: 600px) {
-    .content {
-        margin: 6px;
-    }
-}
 
 
 /* Loader */ 
@@ -271,16 +248,8 @@ button:focus {
         animation: rotate-landscape 2s infinite ease-in-out 1s;
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
-    .loader-container {
-        gap: 6px;
-    }
-    .spinner.small {
-        width: 12px;
-        height: 12px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .loader-container {
         gap: 6px;
     }
@@ -326,7 +295,8 @@ button:focus {
         box-shadow: inset 0 0 1vh rgba(0,0,0,0.1);
     }
 }
-@media (orientation: portrait) and (max-width: 400px) {
+@media (orientation: portrait) and (max-width: 400px),
+(orientation: landscape) and (max-height: 400px) {
     .logo{
         line-height: 24.8px;
         font-size: 24px;
@@ -336,21 +306,8 @@ button:focus {
     }  
 
 }
-@media (orientation: landscape) and (max-height: 400px) {
-    .logo{
-        line-height: 24.8px;
-        font-size: 24px;
-        background-size: 24px;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
-    }  
-}
-@media (orientation: portrait) and (max-width: 600px) {
-    .logo { 
-        padding: 12px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .logo { 
         padding: 12px;
     }
@@ -375,12 +332,8 @@ button:focus {
         gap: 1vh;
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
-    .toolbar { 
-        gap: 6px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .toolbar { 
         gap: 6px;
     }
@@ -422,14 +375,8 @@ button:focus {
         box-shadow: inset 0 0 1vh rgba(0,0,0,0.1);
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
-    .button{
-        padding: 12px;
-        font-size: 18px;
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .button{
         padding: 12px;
         font-size: 18px;
@@ -465,14 +412,9 @@ button:focus {
         font-size: 3vh;
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .info {
-        font-size: 18px;
-        padding: 12px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
-    .info{
         font-size: 18px;
         padding: 12px;
     }
@@ -554,7 +496,6 @@ button:focus {
     cursor: pointer;
     opacity: 1.;
     background-color: #f5f5f5;
-    /*text-shadow: 1px 1px 2px rgba(0,0,0,0.15);*/
     text-rendering: geometricPrecision;
 }
 @media (hover: hover) {
@@ -576,7 +517,8 @@ button:focus {
         box-shadow: inset 0 0 1vh rgba(0,0,0,0.1);
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .filter {   
         padding: 12px;
         font-size: 18px;
@@ -586,25 +528,8 @@ button:focus {
         font-size: 18px;
     }
 }
-@media (orientation: landscape) and (max-height: 600px) {
-    .filter {   
-        padding: 12px;
-        font-size: 18px;
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
-    }
-    .filters h2 {
-        font-size: 18px;
-    }
-}
-@media (orientation: portrait) and (max-width: 600px) {
-    .selection {
-        gap: 6px;
-    }
-    .options {
-        gap: 6px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .selection {
         gap: 6px;
     }
@@ -651,17 +576,12 @@ button:focus {
         height: 180px;
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .gallery {
         gap: 6px;
     }
 }
-@media (orientation: landscape) and (max-height: 600px) {
-    .gallery {
-        gap: 6px;
-    }
-}
-
 
 /* About */
 
@@ -709,16 +629,13 @@ button:focus {
         
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .about hr {
         border-bottom: 6px solid #f0f0f0;
     }
 }
-@media (orientation: landscape) and (max-height: 600px) {
-    .about hr {
-        border-bottom: 6px solid #f0f0f0;
-    }
-}
+
 .about h2 {
     column-span: all;
     text-align: left;
@@ -737,12 +654,8 @@ button:focus {
         
     }
 }
-@media (orientation: portrait) and (max-width: 600px) {
-    .about h2 {
-        font-size: 24px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .about h2 {
         font-size: 24px;
     }
@@ -774,30 +687,17 @@ button:focus {
         column-count: 1;
     }
 }
-@media (orientation: portrait) and (max-width: 900px) {
+@media (orientation: portrait) and (max-width: 900px),
+(orientation: landscape) and (max-height: 900px) {
     .about p {
         font-size: 18px;
     }
 }
-@media (orientation: landscape) and (max-height: 900px) {
-    .about p {
-        font-size: 18px;
-    }
-}
-@media (orientation: portrait) and (max-width: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .about {
         gap: 12px;
         padding-top: 6px;
-    }
-    .about p {
-        margin-bottom: 15px;
-        gap: 12px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
-    .about {
-        padding-top: 6px;
-        gap: 12px;
     }
     .about p {
         margin-bottom: 15px;
@@ -846,12 +746,8 @@ button:focus {
     pointer-events: none;
     padding: 1vh;
 }
-@media (orientation: portrait) and (max-width: 600px) {
-    .image {
-        padding: 6px;
-    }
-}
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
     .image {
         padding: 6px;
     }
