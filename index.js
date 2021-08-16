@@ -76,7 +76,6 @@ export class ImageGallery {
         console.log("%cThe hopefully well behaving image gallery.",'font-weight: bold;')
         console.log(`I am happy to show you the internals.`)
         console.log('https://github.com/emiolechi/photography')
-        console.log(data)
         opts = {...defaultOpts, ...opts}
         // hammer.hs is not imported by this module. Passing as opts possible.
         this.Hammer = Hammer || opts.Hammer 
@@ -103,7 +102,7 @@ export class ImageGallery {
 
         window.addEventListener('popstate', (event) => {
             const state = event.state || clone(defaultState)
-            currentState = state
+            this.currentState = state
             this.applyState()
         })
     }
@@ -342,8 +341,6 @@ export class ImageGallery {
     makeAbout() {
         const aboutContainer = document.createElement('section')
         aboutContainer.classList.add("about")
-        console.log(this)
-        console.log(this.aboutTemplate)
         aboutContainer.append(makeFromTemplate(this.aboutTemplate, this.templateData))
         const onKeyDown = (event) => {
             const key = event.key
@@ -396,7 +393,6 @@ export class ImageGallery {
     // GALLERY
 
     makeGallery() {
-        console.log("make gallery", this.currentState)
         const list = this.currentState.list
         const galleryContainer = document.createElement("section")
         galleryContainer.classList.add("gallery")
