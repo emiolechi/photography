@@ -1,17 +1,27 @@
 /* Reset */
 html, body {
-    background-color: #FCFAF9;
-    color: #121009;
     width: 100%;
     height: 100%;
     overflow: hidden;
+}
+@media (prefers-color-scheme: light) {
+    html, body {
+        background-color: #e7dfdd;
+        color: #121009;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #232120;
+        color: #121009;
+    }
 }
 
 * {
     box-sizing: border-box;
     font-family: 'Crimson Text', serif;
     font-variant-ligatures: common-ligatures;
-    color: #121009;
     font-weight: 400;
     margin: 0;
     padding: 0;
@@ -24,6 +34,44 @@ body {
 
 button:focus {
     outline: 0;
+}
+
+@media (prefers-color-scheme: light) {
+        
+    a {
+        color: #121009;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    a:visited {
+        color: #121009;
+        text-decoration: underline;
+    }
+
+    a:hover {
+        color: #121009;
+        text-decoration: underline;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+        
+    a {
+        color: #d4d2d0;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    a:visited {
+        color: #d4d2d0;
+        text-decoration: underline;
+    }
+
+    a:hover {
+        color: #d4d2d0;
+        text-decoration: underline;
+    }
 }
 
 /* Header */
@@ -98,29 +146,23 @@ button:focus {
 
 @keyframes scale-portrait {
     0% {
-        opacity: 0;
-        transform: scale3d(0.8,0.8,0.8) perspective(30vw) rotateX(0deg) rotateY(0deg);
+        transform: scale3d(0.0,0.0,0.0) perspective(30vw) rotateX(0deg) rotateY(0deg);
     }
     50% {
-        opacity: .5;
         transform: scale3d(0.6,0.6,0.6) perspective(30vw) rotateX(-180.000deg) rotateY(0deg);
     }
     100% {
-        opacity: 1.0;
         transform: scale3d(.8,.8,.8) perspective(30vw) rotateX(-180deg) rotateY(-180.000deg);
     }
 }
 @keyframes scale-landscape {
     0% {
-        opacity: 0;
         transform: scale3d(0.0,0.0,0.0) perspective(30vh) rotateX(0deg) rotateY(0deg);
     }
     50% {
-        opacity: .5;
         transform: scale3d(0.6,0.6,0.6) perspective(30vh) rotateX(-180.000deg) rotateY(0deg);
     }
     100% {
-        opacity: 1.0;
         transform: scale3d(.8,.8,.8) perspective(30vh) rotateX(-180deg) rotateY(-180.000deg);
     }
 }
@@ -156,8 +198,7 @@ button:focus {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgba(234,234,234,0.9);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    background-color: rgba(255,255,255,0.9);
     backface-visibility: hidden;
     outline: 1px solid transparent;
     transform-origin: center center;
@@ -167,8 +208,7 @@ button:focus {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: #eaeaea;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    background-color: #efebe8;
     transform: rotateY( 180deg );
     backface-visibility: hidden;
     outline: 1px solid transparent;
@@ -179,6 +219,11 @@ button:focus {
     position: relative;
 }
 
+.spinner.story {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
 .spinner.large {
     position: absolute;
     left: 50%;
@@ -192,6 +237,12 @@ button:focus {
         width: 2vw;
         height: 2vw;
     }
+    .spinner.story {
+        width: 5vw;
+        height: 5vw;
+        margin-left: -2.5vw;
+        margin-top: -2.5vw;
+    }
     .spinner.large {
         width: 10vw;
         height: 10vw;
@@ -199,9 +250,8 @@ button:focus {
         margin-top: -5vw;
     }
     .spinner.delay-in {
-        opacity: 0;
-        transform: scale3d(0,0,0);
-        animation: scale-portrait 2s ease-in, rotate-portrait 2s infinite ease-in-out;
+        transform: scale3d(.8,.8,.8);
+        animation: rotate-portrait 2s infinite ease-in-out;
     }
     .spinner.delay-0 {
         transform: scale3d(.8,.8,.8);
@@ -224,6 +274,13 @@ button:focus {
         width: 2vh;
         height: 2vh;
     }
+    .spinner.story {
+        width: 5vh;
+        height: 5vh;
+        margin-left: -2.5vh;
+        margin-top: -2.5vh;
+
+    }
     .spinner.large {
         width: 10vh;
         height: 10vh;
@@ -231,9 +288,8 @@ button:focus {
         margin-top: -5vh;
     }
     .spinner.delay-in {
-        opacity: 0;
-        transform: scale3d(0,0,0);
-        animation: scale-landscape 2s ease-in, rotate-landscape 2s infinite ease-in-out 2s;
+        transform: scale3d(.8,.8,.8);
+        animation: rotate-landscape 2s infinite ease-in-out;
     }
     .spinner.delay-0 {
         transform: scale3d(.8,.8,.8);
@@ -259,8 +315,6 @@ button:focus {
     }
 }
 
-
-
 /* Logo */
 
 .logo {
@@ -268,7 +322,7 @@ button:focus {
     cursor: pointer;
     display: flex;
     align-items: center;
-    text-rendering: geometricPrecision;
+    box-sizing: border-box;
 }
 @media (hover: hover) {
     .logo:hover {
@@ -281,8 +335,6 @@ button:focus {
         font-size: 6vw;
         padding: 2vw;
         background-size: 6vw;
-        text-shadow: 0.167vw 0.167vw 0.5vw rgba(0,0,0,0.15);
-        box-shadow: inset 0 0 1vw rgba(0,0,0,0.1);
     }
 }
 @media (orientation: landscape) {
@@ -291,8 +343,6 @@ button:focus {
         font-size: 6vh;
         padding: 2vh;
         background-size: 6vh;
-        text-shadow: 0.167vh 0.167vh 0.5vh rgba(0,0,0,0.15);
-        box-shadow: inset 0 0 1vh rgba(0,0,0,0.1);
     }
 }
 @media (orientation: portrait) and (max-width: 400px),
@@ -301,8 +351,6 @@ button:focus {
         line-height: 24.8px;
         font-size: 24px;
         background-size: 24px;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
     }  
 
 }
@@ -342,7 +390,6 @@ button:focus {
 /* Button */
 
 .button {
-    background-color: #eaeaea;
     cursor: pointer;
     opacity: 1.0;
     display: flex;
@@ -354,8 +401,23 @@ button:focus {
     justify-content: center;
     min-height: 48px;
     min-width: 48px;
-    text-rendering: geometricPrecision;
+    box-sizing: border-box;
 }
+
+@media (prefers-color-scheme: light) {
+    .button {
+        background-color: rgba(255,250,243,0.7);
+        color: #121009;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .button {
+        background-color: rgba(0,0,0,0.2);;
+        color: #d4d2d0;
+    }
+}
+
 @media (hover: hover) {
     .button:hover {
         opacity: 0.75;
@@ -365,14 +427,12 @@ button:focus {
     .button {
         padding: 2vw;
         font-size: 3vw;
-        box-shadow: inset 0 0 1vw rgba(0,0,0,0.1);
     }
 }
 @media (orientation: landscape) {
     .button {
         padding: 2vh;
         font-size: 3vh;
-        box-shadow: inset 0 0 1vh rgba(0,0,0,0.1);
     }
 }
 @media (orientation: portrait) and (max-width: 600px),
@@ -380,9 +440,9 @@ button:focus {
     .button{
         padding: 12px;
         font-size: 18px;
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
     }
 }
+
 
 /* Info */
 
@@ -425,6 +485,7 @@ button:focus {
 .filters {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     overflow-x: hidden;
     overflow-y: scroll;
     -ms-overflow-style: none;  /* IE and Edge */
@@ -443,10 +504,17 @@ button:focus {
         gap: 1vh;
     }
 }
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
+    .filters {   
+        gap: 6px;
+    }
+}
 
 .selection {
     display: flex;
     align-content: flex-start;
+    flex-direction: row;
     flex-wrap: wrap;
 }
 @media (orientation: portrait) {
@@ -457,12 +525,19 @@ button:focus {
 @media (orientation: landscape) {
     .selection {
         gap: 1vh;
+    }
+}
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
+    .selection {   
+        gap: 6px;
     }
 }
 
 .options {
     display: flex;
     align-content: flex-start;
+    flex-direction: row;
     flex-wrap: wrap;
 }
 @media (orientation: portrait) {
@@ -475,19 +550,50 @@ button:focus {
         gap: 1vh;
     }
 }
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
+    .options {   
+        gap: 6px;
+    }
+}
+
 
 .filters h2 {
     text-align: left;
-    width: 100%;
+    background-color: rgba(255,250,243,0.7);
+}
+
+
+@media (prefers-color-scheme: light) {
+    .filters h2 {
+        background-color: rgba(255,250,243,0.7);
+        color: #121009;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .filters h2 {
+        background-color: rgba(0,0,0,0.2);;
+        color: #d4d2d0;
+    }
 }
 @media (orientation: portrait) {
     .filters h2 {
         font-size: 3vw;
+        padding: 2vw;
     }
 }
 @media (orientation: landscape) {
     .filters h2 {
         font-size: 3vh;
+        padding: 2vh;
+    }
+}
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
+    .filters h2 {
+        font-size: 18px;
+        padding: 12px;
     }
 }
 
@@ -497,6 +603,7 @@ button:focus {
     opacity: 1.;
     background-color: #f5f5f5;
     text-rendering: geometricPrecision;
+    box-sizing: border-box;
 }
 @media (hover: hover) {
     .filter:hover {    
@@ -507,14 +614,12 @@ button:focus {
     .filter {
         font-size: 3vw;
         padding: 2vw;
-        box-shadow: inset 0 0 1vw rgba(0,0,0,0.1);
     }
 }
 @media (orientation: landscape) {
     .filter {
         font-size: 3vh;
         padding: 2vh;
-        box-shadow: inset 0 0 1vh rgba(0,0,0,0.1);
     }
 }
 @media (orientation: portrait) and (max-width: 600px),
@@ -522,12 +627,9 @@ button:focus {
     .filter {   
         padding: 12px;
         font-size: 18px;
-        box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
-    }
-    .filters h2 {
-        font-size: 18px;
     }
 }
+
 @media (orientation: portrait) and (max-width: 600px),
 (orientation: landscape) and (max-height: 600px) {
     .selection {
@@ -563,11 +665,20 @@ button:focus {
         gap: 1vh;
     }
 }
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
+    .gallery {
+        gap: 6px;
+    }
+}
 
 .thumbnail {
     height: 30vh;
     cursor: pointer;
-    max-width: 100%;
+    min-height: 150px;
+    max-width: 600px;
+    max-height: 900px;
+    flex: 1;
     object-fit: cover;
     background-color: #ECEAEA;
 }
@@ -576,134 +687,167 @@ button:focus {
         height: 180px;
     }
 }
-@media (orientation: portrait) and (max-width: 600px),
-(orientation: landscape) and (max-height: 600px) {
-    .gallery {
-        gap: 6px;
-    }
-}
 
-/* About */
+/* Story */
 
-.about {
+.story {
     display: flex;
     flex: 1;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
     overflow-x: hidden;
     overflow-y: scroll;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
-.about::-webkit-scrollbar {
+.story::-webkit-scrollbar {
     display: none;
 }
 @media (orientation: portrait) {
-    .about {
-        gap: 2vw;
-        padding-top: 1vw;
+    .story {
+        gap: 1vw;
     }
 }
 @media (orientation: landscape) {
-    .about {
-        gap: 2vh;
-        padding-top: 1vh;
-    }
-}
-
-.about hr {
-    column-span: all;
-    max-width: 1620px;
-    width: 100%;
-    border: none;
-    border-bottom: 1vh solid #f0f0f0;
-}
-@media (orientation: portrait) {
-    .about hr {
-        border-bottom: 1vw solid #f0f0f0;
-        
-    }
-}
-@media (orientation: landscape) {
-    .about hr {
-        border-bottom: 1vh solid #f0f0f0;
-        
+    .story {
+        gap: 1vh;
     }
 }
 @media (orientation: portrait) and (max-width: 600px),
 (orientation: landscape) and (max-height: 600px) {
-    .about hr {
-        border-bottom: 6px solid #f0f0f0;
+    .story {
+        gap: 6px;
     }
 }
 
-.about h2 {
-    column-span: all;
+@media (orientation: portrait) {
+    .story > article {
+        padding: 2vw;
+    }
+}
+@media (orientation: landscape) {
+    .story > article {
+        padding: 2vh;
+    }
+}
+@media (orientation: portrait) and (max-width: 600px),
+(orientation: landscape) and (max-height: 600px) {
+    .story > article {
+        padding: 12px;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .story > article {
+        background-color: rgba(255,250,243,0.7);
+        color: #121009;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .story > article {
+        background-color: rgba(0,0,0,0.2);;
+        color: #d4d2d0;
+    }
+}
+
+.story h2 {
     text-align: left;
-    max-width: 1620px;
-    width: 100%;
+    flex: 0;
 }
 @media (orientation: portrait) {
-    .about h2 {
-        font-size: 4vw;
-        
+    .story h2 {
+        font-size: 3vw;
+        margin-bottom: 1vw;
     }
 }
 @media (orientation: landscape) {
-    .about h2 {
-        font-size: 4vh;
-        
+    .story h2 {
+        font-size: 3vh;
+        margin-bottom: 1vh;
     }
 }
-@media (orientation: portrait) and (max-width: 600px),
-(orientation: landscape) and (max-height: 600px) {
-    .about h2 {
+@media (orientation: portrait) and (max-width: 800px),
+(orientation: landscape) and (max-height: 800px) {
+    .story h2 {
         font-size: 24px;
+        margin-bottom: 8px;
     }
 }
 
-.about p {
-    max-width: 1620px;
+.story .multicolumn {
     text-align: justify;
-    text-justify: inter-word;
-    column-count: 3;
+    column-count: 4;
+    orphans: 3;
+    widows: 1;
 }
 @media (orientation: portrait) {
-    .about p {
+    .story .multicolumn {
         font-size: 2vw;
+        gap: 2vw;
     }
 }
 @media (orientation: landscape) {
-    .about p {
+    .story .multicolumn {
         font-size: 2vh;
+        gap: 2vh;
     }
 }
-@media (max-width: 1080px) {
-    .about p {
+@media (max-width: 1600px) {
+    .story .multicolumn {
+        column-count: 3;
+    }
+}
+@media (max-width: 1200px) {
+    .story .multicolumn v{
         column-count: 2;
     }
 }
-@media (max-width: 540px) {
-    .about p {
+@media (max-width: 600px) {
+    .story .multicolumn {
         column-count: 1;
     }
 }
 @media (orientation: portrait) and (max-width: 900px),
 (orientation: landscape) and (max-height: 900px) {
-    .about p {
+    .story .multicolumn {
         font-size: 18px;
     }
 }
 @media (orientation: portrait) and (max-width: 600px),
 (orientation: landscape) and (max-height: 600px) {
-    .about {
-        gap: 12px;
-        padding-top: 6px;
-    }
-    .about p {
-        margin-bottom: 15px;
+    .story .multicolumn {
         gap: 12px;
     }
 }
+
+
+.story .break{ 
+    position: relative;
+    display: inline-flex;
+    min-width: 100%;
+    background-color: rgba(0,0,0,.2);
+}
+
+
+.story .break img {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (orientation: portrait) {
+    .story .break {
+        height: 15em;
+    }
+}
+@media (orientation: landscape) {
+    .story .break {
+        height: 15em;
+    }
+}
+
 
 /* Detail */
 

@@ -29,7 +29,7 @@ function replaceRecursive(node, data) {
     }
 }
 function makeFromTemplate(template, data) {
-    var clone = template.content.cloneNode(true)
+    const clone = template.content.cloneNode(true)
     replaceRecursive(clone, data)
     return clone
 }
@@ -43,12 +43,12 @@ function retrieveElement(el, root) {
 }
 
 export const GALLERY = "gallery"
-export const ABOUT = "about"
+export const STORY = "story"
 export const FILTER = "filter"
 export const DETAIL = "detail"
 
 const defaultState = {
-    view: GALLERY,
+    view: STORY,
     hash: '',
     color: {r:0, g:0, b:0},
     tags: [],
@@ -60,10 +60,10 @@ const defaultOpts = {
     templateData: {},
     headerTemplate: '#header-template',
     contentTemplate: '#content-template',
-    aboutTemplate: '#about-template',
+    storyTemplate: '#story-template',
     rootElement: document.body,
     logoElement: '.logo',
-    aboutButton: '.about-button',
+    storyButton: '.story-button',
     filterButton: '.filter-button',
     galleryButton: '.gallery-button',
     infoElement: '.info',
@@ -77,6 +77,7 @@ export class ImageGallery {
         console.log(`I am happy to show you the internals.`)
         console.log('https://github.com/emiolechi/photography')
         opts = {...defaultOpts, ...opts}
+
         // hammer.hs is not imported by this module. Passing as opts possible.
         this.Hammer = Hammer || opts.Hammer 
         this.data = data
@@ -84,7 +85,7 @@ export class ImageGallery {
         this.viewGenerators = new Map()
         this.viewGenerators.set(DETAIL, ()=>{return this.makeDetail()})
         this.viewGenerators.set(GALLERY, ()=>{return this.makeGallery()})
-        this.viewGenerators.set(ABOUT, ()=>{return this.makeAbout()})
+        this.viewGenerators.set(STORY, ()=>{return this.makeStory()})
         this.viewGenerators.set(FILTER, ()=>{return this.makeFilter()})
 
         this.currentState = clone(defaultState)
@@ -94,7 +95,7 @@ export class ImageGallery {
 
         this.headerTemplate = retrieveElement(opts.headerTemplate, this.rootElement)
         this.contentTemplate = retrieveElement(opts.contentTemplate, this.rootElement)
-        this.aboutTemplate = retrieveElement(opts.aboutTemplate, this.rootElement)
+        this.storyTemplate = retrieveElement(opts.storyTemplate, this.rootElement)
 
         this.makeApplication(opts)
         this.readState()
@@ -116,7 +117,7 @@ export class ImageGallery {
 
         this.contentContainer = retrieveElement(opts.contentContainer)
         this.logoElement = retrieveElement(opts.logoElement)
-        this.aboutButton = retrieveElement(opts.aboutButton)
+        this.storyButton = retrieveElement(opts.storyButton)
         this.filterButton = retrieveElement(opts.filterButton)
         this.galleryButton = retrieveElement(opts.galleryButton)
         this.infoElement = retrieveElement(opts.infoElement)
@@ -141,7 +142,7 @@ export class ImageGallery {
         const hashStr = urlParams.get('hash')
         if (hashStr) this.currentState.hash = hashStr
         const view = urlParams.get('view')
-        if ([GALLERY, ABOUT, DETAIL, FILTER].indexOf(view) != -1) this.currentState.view = view
+        if ([GALLERY, STORY, DETAIL, FILTER].indexOf(view) != -1) this.currentState.view = view
         const filtersStr = urlParams.get('filters')
         const filtersArr = filtersStr?filtersStr.split(','):[]
         this.currentState.tags = filtersArr.filter(value => this.data.tags.hasOwnProperty(value) != -1)
@@ -152,7 +153,6 @@ export class ImageGallery {
         url.searchParams.set('filters', this.currentState.tags)
         url.searchParams.set('view', this.currentState.view)
         url.searchParams.set('hash', this.currentState.hash)
-        const currentParams = new URLSearchParams()
         if (url.search!==window.location.search) {
             window.history.pushState(
                 clone(this.currentState), 
@@ -178,10 +178,10 @@ export class ImageGallery {
 
 
 
-    navigate(view, opts) {
+    navigate(view, opts, direct) {
         this.currentState = {...this.currentState, ...opts, ...{view}}
         this.saveState()
-        this.show(view, opts)
+        this.show(view, opts, direct)
     }
 
     invalidate(view) {
@@ -195,7 +195,9 @@ export class ImageGallery {
     }
 
 
-    show(view, opts) {
+    async show(view, opts, direct) {
+        this.updateNavi()
+        if (!direct) await this.fadeOutContent().catch(console.warn)
         this.clearContent()
         if (this.viewCache.has(view)) {
             this.appendContent(this.viewCache.get(view)) 
@@ -204,15 +206,46 @@ export class ImageGallery {
             if (!elem.noCache) this.viewCache.set(view, elem)
             this.appendContent(elem)
         }
-        this.updateNavi()
+        if (!direct) this.fadeInContent().catch(console.warn)
     }
 
 
     appendContent(elem) {
-        this.contentContainer.append(elem) 
+        this.contentContainer.append(elem)
         if (typeof elem.attach === 'function') {
             elem.attach()
         }
+    }
+
+    fadeOutContent() {
+        this.contentContainer.style.transition = 'unset'
+        return new Promise((resolve, reject)=> {
+            if (this.contentContainer.firstChild) {
+                this.contentContainer.style.transition = 'opacity 0.3s ease-in'
+                this.contentContainer.ontransitionend = resolve
+                this.contentContainer.ontransitioncancel = reject
+                this.contentContainer.style.opacity = 0
+            } else {
+                // empty just set opacity
+                this.contentContainer.opacity = 0
+                resolve()
+            }
+        })
+    }
+    fadeInContent() {
+        this.contentContainer.style.transition = 'unset'
+        return new Promise((resolve, reject)=> {
+            if (this.contentContainer.firstChild) {
+                this.contentContainer.style.transition = 'opacity 0.3s ease-out'
+                this.contentContainer.ontransitionend = resolve
+                this.contentContainer.ontransitioncancel = reject
+                this.contentContainer.style.opacity = 1
+            } else {
+                // empty just set opacity
+                this.contentContainer.opacity = 1
+                resolve()
+            }
+        })
     }
 
     clearContent() {
@@ -250,40 +283,49 @@ export class ImageGallery {
     }
     
     attachButtonLogic(elem, cb) {
-        const mc = new this.Hammer.Manager(elem, {})
+        const mc = new this.Hammer.Manager(elem)
         mc.add(new this.Hammer.Tap())
-        mc.on("tap", cb)
+        mc.on("tap", (ev)=> {
+            cb(ev)
+            
+        })
+        return mc
+    }
+
+    onLogoClick() {
+        // override if needed
     }
     
     makeNavigation() {
-        this.attachButtonLogic(this.aboutButton, () => {this.navigate(ABOUT)})
+        this.attachButtonLogic(this.logoElement, () => this.onLogoClick())
+        this.attachButtonLogic(this.storyButton, () => {this.navigate(STORY)})
         this.attachButtonLogic(this.galleryButton, () => {this.navigate(GALLERY)})
         this.attachButtonLogic(this.filterButton, () => {this.navigate(FILTER)})
         this.attachButtonLogic(this.backButton, () => {this.navigate(GALLERY)})
     }
 
     useDefaultNavigation() {
-        this.aboutButton.classList.remove("hidden")
+        this.storyButton.classList.remove("hidden")
         this.backButton.classList.add("hidden")
-        this.infoElement.classList.add("hidden")
+        if (this.infoElement) this.infoElement.classList.add("hidden")
         this.galleryButton.classList.remove("hidden")
         this.filterButton.classList.remove("hidden")
         this.logoElement.classList.remove("hidden")
     }
 
     useModalNavgation() {
-        this.aboutButton.classList.add("hidden")
+        this.storyButton.classList.add("hidden")
         this.backButton.classList.remove("hidden")
-        this.infoElement.classList.remove("hidden")
+        if (this.infoElement) this.infoElement.classList.remove("hidden")
         this.galleryButton.classList.add("hidden")
         this.filterButton.classList.add("hidden")
         this.logoElement.classList.remove("hidden")
     }
 
     removeActive() {
-        this.aboutButton.classList.remove("active")
+        this.storyButton.classList.remove("active")
         this.backButton.classList.remove("active")
-        this.infoElement.classList.remove("active")
+        if (this.infoElement) this.infoElement.classList.remove("active")
         this.galleryButton.classList.remove("active")
         this.filterButton.classList.remove("active")
     }
@@ -292,7 +334,7 @@ export class ImageGallery {
         this.removeActive() 
         switch (this.currentState.view) {
             case DETAIL:
-                this.useModalNavgation()
+                this.useDefaultNavigation()
                 break
             case GALLERY:
                 this.useDefaultNavigation()
@@ -302,28 +344,41 @@ export class ImageGallery {
                 this.useDefaultNavigation()
                 this.filterButton.classList.add("active")
                 break
-            case ABOUT:
+            case STORY:
                 this.useDefaultNavigation()
-                this.aboutButton.classList.add("active")
+                this.storyButton.classList.add("active")
                 break
         }
         this.updateColors()
     }
 
-    applyFilters() {
-        this.currentState.list = this.data.list.filter(image => {
+    filterList(list, tags) {
+        return list.filter(image => {
             let fail = false
-            this.currentState.tags.forEach(filter => {
+            tags.forEach(filter => {
                 if (image.tags.indexOf(filter) == -1) fail = true
             })
             return !fail
         })
+    }
+
+    sortByName(list) {
+        return list.sort((a,b)=>{return a.name < b.name ? -1 : 1;})
+    }
+    sortByRating(list) {
+        return list.sort((a,b)=>{return a.rating > b.rating ? -1 : 1;})
+    }
+
+
+    applyFilters() {
+        this.currentState.list = this.filterList(this.data.list, this.currentState.tags)
+        
         if (!this.currentState.list.length) {
-            // empty list
+            // empty list, remove tags and return all
             this.currentState.tags = []
-            this.currentState.list = [...data.list]
+            this.currentState.list = [...this.data.list]
         }
-        this.currentState.list = this.currentState.list.sort((a,b)=>{return a.name < b.name ? -1 : 1;})
+        this.currentState.list = this.sortByName(this.currentState.list) //this.currentState.list.sort((a,b)=>{return a.name < b.name ? -1 : 1;})
         this.currentState.filters = Array.from(new Set(this.currentState.list.map(image => image.tags).flat().sort()))
         this.invalidate(GALLERY)
         this.invalidate(FILTER)
@@ -336,12 +391,88 @@ export class ImageGallery {
         this.updateColors()
     }
 
-    // ABOUT
+    // STORY
+    
+    postProcessTemplate(templateEl) {
+        let imgElems = templateEl.querySelectorAll('img:not([src])')
+        Array.from(imgElems).forEach((imgElem)=> {
+            const pick = imgElem.dataset.pick
+            const type = imgElem.dataset.type
+            const position = imgElem.dataset.position
+            const filters = imgElem.dataset.filter.split(',')
+            let list = this.filterList(this.data.list, filters)
+            switch (pick) {
+                case "name":
+                    list = this.sortByName(list)
+                    break
+                case "rating":
+                    list = this.sortByName(this.sortByRating(list))
+                    break
+            }
+            if (list.length) {
+                const image = list[0]
+                const loaderElem = this.makeStoryLoader(image.dominantColor)
 
-    makeAbout() {
-        const aboutContainer = document.createElement('section')
-        aboutContainer.classList.add("about")
-        aboutContainer.append(makeFromTemplate(this.aboutTemplate, this.templateData))
+                imgElem.parentElement.append(loaderElem)
+                imgElem.style.opacity = 0
+                imgElem.setAttribute('loading', 'eager')
+                const onLoad = (ev) => {
+                    loaderElem.remove()
+                    
+                    if (imgElem.complete || imgElem.readyState === 4) {
+    
+                        setTimeout(()=>{
+                            if (imgElem) {
+                                imgElem.style.transition = "opacity ease-in 0.5s";
+                                imgElem.style.opacity = 1.0
+                            }
+                        }, 10)
+                    }
+                }
+                imgElem.addEventListener("load", onLoad)
+                if (type === "thumbnail") {
+                    imgElem.src = image.thumbnail
+                } else {
+                    imgElem.src = image.src
+                }
+            }
+            if (position) {
+                imgElem.style.objectPosition = position
+            }
+        })
+        let anchorElems = templateEl.querySelectorAll('a:not([href])')
+        Array.from(anchorElems).forEach((anchorElem)=> {
+            const filters = anchorElem.dataset.filter.split(',') || []
+            const view = anchorElem.dataset.view || GALLERY
+            const hash = anchorElem.dataset.hash || ""
+            
+            const mc = this.attachButtonLogic(anchorElem, () => {
+                if (hash) this.currentState.hash = hash
+                this.currentState.tags = filters
+                this.applyFilters()
+                this.navigate(view)
+            })
+            anchorElem.destroy = () => {
+                mc.destroy()
+            }
+            /*
+            use navigate
+            const url = new URL(window.location)
+            url.searchParams.set('filters', filters)
+            url.searchParams.set('view', view)
+            url.searchParams.set('hash', hash)
+            anchorElem.href = url*/
+        })
+    }
+
+    makeStory() {
+        let storyScrollPos = 0
+        const storyContainer = document.createElement('section')
+        storyContainer.classList.add("story")
+        const templateElement = makeFromTemplate(this.storyTemplate, this.templateData)
+        this.postProcessTemplate(templateElement)
+        storyContainer.append(templateElement)
+        
         const onKeyDown = (event) => {
             const key = event.key
             switch (key) {
@@ -351,14 +482,28 @@ export class ImageGallery {
                     break
             }
         }
-        aboutContainer.attach = () => {
+        const onScroll = (ev) => {
+            storyScrollPos = storyContainer.scrollTop
+        }
+        storyContainer.attach = () => {
+            if (storyScrollPos) storyContainer.scrollTop = storyScrollPos
+            storyContainer.addEventListener("scroll", onScroll)
+            storyContainer.addEventListener("touchmove", onScroll)
             this.rootElement.addEventListener('keydown', onKeyDown)
         }
-        aboutContainer.detach = () => {
+        storyContainer.detach = () => {
+            storyContainer.removeEventListener("scroll", onScroll)
+            storyContainer.removeEventListener("touchmove", onScroll)
             this.rootElement.removeEventListener('keydown', onKeyDown)
-            }
+        }  
+        storyContainer.destroy = () => {
 
-        return aboutContainer
+            const anchorElems = storyContainer.querySelectorAll('a')
+            Array.from(anchorElems).forEach((anchorElem)=> {
+                if (anchorElem.destroy) anchorElem.destroy()
+            })
+        }
+        return storyContainer
     }
 
 
@@ -378,6 +523,10 @@ export class ImageGallery {
     
     makeDetailLoader(color) {
         return this.makeSpinner(color, ["large", "delay-in"])
+    }
+    
+    makeStoryLoader(color) {
+        return this.makeSpinner(color, ["story", "delay-in"])
     }
 
     makeGalleryLoader(color) {
@@ -506,12 +655,12 @@ export class ImageGallery {
         const animateFactor = .167
         const gcThreshold = 15
         const gcLimit = 10
-        const swipeThreshold = .167
+        const swipeThreshold = 90 // px
         const imagePreloadCycles = 2 // images per side (left & right)
         let offset = -imagePreloadCycles
         let panTarget = offset
         let panOffset = 0
-        this.infoElement.innerText = `${list[index].name}`
+        if (this.infoElement) this.infoElement.innerText = `${list[index].name}`
 
         const mc = new this.Hammer.Manager(detailContainer, {})
         
@@ -538,12 +687,15 @@ export class ImageGallery {
             const onLoad = (ev) => {
                 loaderElem.remove()
                 container.append(imgElem)
-                setTimeout(()=>{
-                    if (imgElem) {
-                        imgElem.style.transition = "opacity ease-in 0.5s";
-                        imgElem.style.opacity = 1.0
-                    }
-                }, 10)
+                if (imgElem.complete || imgElem.readyState === 4) {
+
+                    setTimeout(()=>{
+                        if (imgElem) {
+                            imgElem.style.transition = "opacity ease-in 0.5s";
+                            imgElem.style.opacity = 1.0
+                        }
+                    }, 10)
+                }
             }
             imgElem.addEventListener("load", onLoad)
             imgElem.src = image.src
@@ -650,7 +802,7 @@ export class ImageGallery {
 
         mc.on("tap", (ev)=>{
             let currentImg = imgContainer.children[Math.round(-offset)]
-            if(currentImg) { 
+            if (currentImg) { 
                 currentImg.resetTransform(true)
             }
         })
@@ -667,11 +819,12 @@ export class ImageGallery {
         })
 
         mc.on("panend", (ev)=>{
-            if (panOffset < -swipeThreshold) {
+            const w = imgContainer.getBoundingClientRect().width
+            if (panOffset * w < -swipeThreshold) {
                 panTarget = Math.round(offset - 1)
                 index = wrap(list, index + 1)
                 loadRight()
-            } else if (panOffset > swipeThreshold) {
+            } else if (panOffset * w > swipeThreshold) {
                 panTarget = Math.round(offset + 1)
                 index = wrap(list, index - 1)
                 loadLeft()
@@ -680,7 +833,7 @@ export class ImageGallery {
             }
             offset += panOffset
             panOffset = 0
-            this.infoElement.innerText = `${list[index].name}`
+            if (this.infoElement) this.infoElement.innerText = `${list[index].name}`
             this.currentState.hash = list[index].hash
             this.currentState.color = list[index].dominantColor
             this.updateColors()  
@@ -753,7 +906,7 @@ export class ImageGallery {
                 case "ArrowLeft":
                     panTarget = Math.round(offset + 1)
                     index = wrap(list, index - 1)
-                    this.infoElement.innerText = `${list[index].name}`
+                    if (this.infoElement) this.infoElement.innerText = `${list[index].name}`
                     this.currentState.hash = list[index].hash
                     this.currentState.color = list[index].dominantColor
                     this.updateColors()
@@ -765,7 +918,7 @@ export class ImageGallery {
                 case "ArrowRight":
                     panTarget = Math.round(offset - 1)
                     index = wrap(list, index + 1)
-                    this.infoElement.innerText = `${list[index].name}`
+                    if (this.infoElement) this.infoElement.innerText = `${list[index].name}`
                     this.currentState.hash = list[index].hash
                     this.currentState.color = list[index].dominantColor
                     this.updateColors()
@@ -801,19 +954,22 @@ export class ImageGallery {
         const fllen = this.currentState.list.length
         const fllenStr = fllen==0?"no":fllen
         const imageStr = fllen<=1?'image':'images'
-        this.infoElement.innerText = `${fllenStr} ${imageStr} found`
+        if (this.infoElement) this.infoElement.innerText = `${fllenStr} ${imageStr} found`
         const filterContainer = document.createElement("section")
         filterContainer.classList.add("filters")
+
+        const selectionHeadline = document.createElement("h2")
+        selectionHeadline.innerText = "Selected tags:"
         const selectionContainer = document.createElement("section")
         selectionContainer.classList.add("selection")
-        const selectionHeadline = document.createElement("h2")
-        selectionHeadline.innerText = "Selected filters"
         selectionContainer.appendChild(selectionHeadline)
-        const optionsContainer = document.createElement("section")
+
         const optionsHeadline = document.createElement("h2")
-        optionsHeadline.innerText = "Possible filters"
-        optionsContainer.appendChild(optionsHeadline)
+        optionsHeadline.innerText = "Possible tags:"
+        const optionsContainer = document.createElement("section")
         optionsContainer.classList.add("options")
+        optionsContainer.appendChild(optionsHeadline)
+
         this.currentState.filters.forEach((filter) => {
             const meta = this.data.tags[filter]
             const filterElem = document.createElement("button")
@@ -828,7 +984,7 @@ export class ImageGallery {
                     this.currentState.tags.push(filter)
                 }
                 this.applyFilters()
-                this.navigate(FILTER)
+                this.navigate(FILTER, {}, true)
             })
             filterElem.destroy = () => {
                 mc.destroy()
@@ -836,15 +992,29 @@ export class ImageGallery {
             filterElem.innerText = `${filter}`
             filterElem.style.backgroundColor = `rgba(${meta.dominantColor.r},${meta.dominantColor.g},${meta.dominantColor.b},.9)`
             filterElem.style.color = isBright(meta.dominantColor)?'black':'white'
+
             if (this.currentState.tags.indexOf(filter) != -1) {
                 filterElem.classList.add("selected")
                 selectionContainer.append(filterElem)
             } else {
                 optionsContainer.append(filterElem)
             }
-            if (this.currentState.tags.length) filterContainer.appendChild(selectionContainer)
-            if (this.currentState.tags.length - this.currentState.filters.length) filterContainer.appendChild(optionsContainer)
+            
         })
+        if (this.currentState.tags.length - this.currentState.filters.length) {
+            filterContainer.appendChild(optionsContainer)
+        }
+        if (this.currentState.tags.length) {
+            filterContainer.appendChild(selectionContainer)
+        }
+        /*
+        future implementation
+        const timeContainer = document.createElement("div")
+        const timeInput = document.createElement("input")
+        timeInput.setAttribute('type', 'range')
+        timeContainer.appendChild(timeInput)
+        filterContainer.appendChild(timeContainer)*/
+
         const onKeyDown = (event) => {
             const key = event.key
             switch (key) {

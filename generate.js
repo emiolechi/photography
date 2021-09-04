@@ -9,13 +9,13 @@ import exifr from 'exifr'
 
 
 (async () => {
-    let data = {list: [], tags: {}, paths: {}, names: []}
+    let data = {list: [], tags: {}, paths: {}}
     try {
         // await fs.emptyDir('generated')
 
         // search for names
-        const namesStr = await fs.readFile('assets/names', 'utf8');
-        data.names = namesStr.split(/\r\n?|\n/gi)
+        //const namesStr = await fs.readFile('assets/names', 'utf8');
+        //data.names = namesStr.split(/\r\n?|\n/gi)
           
 
         const paths = await globby('assets', {
@@ -50,12 +50,19 @@ import exifr from 'exifr'
                 if(!data.paths.hasOwnProperty(pathString)) data.paths[pathString] = {colors:[]}
                 data.paths[pathString].colors.push(dominantColor)
 
-                const tags = imageMeta.subject || []
+                let tags = []
+                if (imageMeta.subject) {
+                    if (Array.isArray(imageMeta.subject)) {
+                        tags = imageMeta.subject
+                    } else {
+                        tags = [imageMeta.subject]
+                    }
+                }
+                
                 tags.forEach((tag)=>{
                     if(!data.tags.hasOwnProperty(tag)) data.tags[tag] = {colors:[]}
                     data.tags[tag].colors.push(dominantColor)
                 })
-
                 const meta = {
                     thumbnail: path.join('generated',`${imageHash}-thumb.jpg`),
                     src: path.join('generated',`${imageHash}.jpg`),
@@ -69,7 +76,7 @@ import exifr from 'exifr'
                     },
                     path: pathString,
                     date: imageMeta.DateTimeOriginal || imageMeta.CreateDate,
-                    rating: (imageMeta.rating * 20) || imageMeta.RatingPercent || 0,
+                    rating: (imageMeta.Rating * 20) || imageMeta.RatingPercent || 0,
                     tags: Array.from(new Set(tags))
                 }
                 console.log(meta)
