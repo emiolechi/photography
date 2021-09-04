@@ -406,7 +406,7 @@ export class ImageGallery {
                     list = this.sortByName(list)
                     break
                 case "rating":
-                    list = this.sortByName(this.sortByRating(list))
+                    list = this.sortByRating(list)
                     break
             }
             if (list.length) {
